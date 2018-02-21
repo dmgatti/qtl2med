@@ -7,18 +7,18 @@ Authors@R: person("Daniel", "Gatti", email = "dan.gatti@jax.org",
   role = c("aut", "cre"))
 Description: Given a quantitative trait locus (qtl), the data that produced
     the qtl peak and gene expression data for the same set of subjects, ask
-	whether the expression of any of the genes explains a significant part
-	of the variance. We do this by regressing the phenotype on covariates
-	and the genotype at the QTL peak and comparing this to a model that adds
-	the expression of one gene. When we do this across the genome, we often
-	find several genes that reduce the LOD score. These genes are candidate
-	mediators that may be influencing the phenotype.
+    whether the expression of any of the genes explains a significant part
+    of the variance. We do this by regressing the phenotype on covariates
+    and the genotype at the QTL peak and comparing this to a model that adds
+    the expression of one gene. When we do this across the genome, we often
+    find several genes that reduce the LOD score. These genes are candidate
+    mediators that may be influencing the phenotype.
 Depends: R (>= 3.1.4)
 Imports:
     AnnotationHub,
-	qtl2,
-	rtracklayer,
-	tidyverse
+    qtl2,
+    rtracklayer,
+    tidyverse
 License: GPL3
 LazyData: true
 RoxygenNote: 6.0.1

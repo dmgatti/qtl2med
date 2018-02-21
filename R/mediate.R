@@ -59,7 +59,8 @@ mediate = function(pheno, chr, pos, type = c("haplo", "snp"), expr, ensembl,
     mutate(full_ss = map_dbl(data, full_mod),
            red_ss  = map_dbl(data, red_mod)) %>%
     select(ensembl, full_ss, red_ss) %>%
-    mutate(lod = 0.5 * -num_samp * log10(full_ss / red_ss))
+    mutate(lod = 0.5 * -num_samp * log10(full_ss / red_ss)) %>%
+    select(-full_ss, -red_ss)
   
   df = left_join(df, select(ensembl, ensembl:start), by = "ensembl") %>%
        mutate(start = start * 1e-6)

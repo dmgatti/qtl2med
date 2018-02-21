@@ -7,7 +7,7 @@
 #' @param expr: numeric matrix containing the gene expression values. Sample names in rownames and Ensembl IDs in colnames.
 #' @param ensembl: data.frame containing gene annotation as obtained from \code{get_ensembl_gene}.
 #' @param genoprobs: list containing 3-dimensional arrays of allele probs, one for each chromosome. In qtl2 format. Samples in rows, 8 founders in columns, markers in slices.
-#' @param addcovar: numeric matrix of additive covariates without the intercept. Sample IDs must be in rownames. Typically creates using model.matrix(~covar1 + covar2, data = data)[,-1].
+#' @param addcovar: numeric matrix of additive covariates *without* the intercept. Sample IDs must be in rownames. Typically creates using model.matrix(~covar1 + covar2, data = data).
 #' @param cc_dbfile: full path to the CC_SNP database file created by Karl Broman.
 #' @return data.frame containing the mediation results.
 mediate = function(pheno, chr, pos, type = c("haplo", "snp"), expr, ensembl,
@@ -27,18 +27,21 @@ mediate = function(pheno, chr, pos, type = c("haplo", "snp"), expr, ensembl,
 
   Q = data.frame(mouse = rownames(Q), Q)
 
-  # Set up tow models to compare.
-  full_mod = function(df) { as.numeric(logLik(lm(pheno ~ ., data = df))) }
-  red_mod  = function(df) { as.numeric(logLik(lm(pheno ~ ., data = select(df, -Q)))) }
+  # Set up two models to compare.
+  # NOTE: We are computing the sum of squares of the residuals here.
+  # Full model reressing phenotype on covariates, gene expression and genotype.
+  full_mod = function(df) { sum(residuals(lm(pheno ~ ., data = df))^2) }
+  # Reduced model reressing phenotype on covariates and gene expression.
+  red_mod  = function(df) { sum(residuals(lm(pheno ~ ., data = select(df, -Q)))^2) }
   if(type == "haplo") {
-    red_mod = function(df) { as.numeric(logLik(lm(pheno ~ ., data = select(df, -(B:H))))) }
+    red_mod  = function(df) { sum(residuals(lm(pheno ~ ., data = select(df, -(B:H))))^2) }
   }
-
+  
   pheno.df = data.frame(mouse = rownames(pheno), pheno = pheno[,1])
   common.genes = intersect(colnames(expr), ensembl$ensembl)
   expr = expr[,common.genes]
   ensembl = ensembl[match(common.genes, ensembl$ensembl),]
-  all(colnames(expr) == ensembl$ensembl)
+  stopifnot(all(colnames(expr) == ensembl$ensembl))
   expr.df  = data.frame(mouse = rownames(expr), expr)
   addcovar.df = data.frame(mouse = rownames(addcovar), addcovar)
 
@@ -50,12 +53,14 @@ mediate = function(pheno, chr, pos, type = c("haplo", "snp"), expr, ensembl,
            group_by(ensembl) %>%
            nest()
 
+  # NOTE: We compute the LOD as 0.5 * -num_samples * log10(full_ss / red_ss).
+  num_samp = nrow(df$data[[1]])
   df = df %>% 
-           mutate(full_ll = map_dbl(data, full_mod),
-                  red_ll  = map_dbl(data, red_mod)) %>%
-                  select(ensembl, full_ll, red_ll) %>%
-                  mutate(lod = (full_ll - red_ll) / log(10))
-
+    mutate(full_ss = map_dbl(data, full_mod),
+           red_ss  = map_dbl(data, red_mod)) %>%
+    select(ensembl, full_ss, red_ss) %>%
+    mutate(lod = 0.5 * -num_samp * log10(full_ss / red_ss))
+  
   df = left_join(df, select(ensembl, ensembl:start), by = "ensembl") %>%
        mutate(start = start * 1e-6)
 

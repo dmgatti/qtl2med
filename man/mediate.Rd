@@ -22,7 +22,7 @@ mediate(pheno, chr, pos, type = c("haplo", "snp"), expr, ensembl, genoprobs,
 
 \item{genoprobs:}{list containing 3-dimensional arrays of allele probs, one for each chromosome. In qtl2 format. Samples in rows, 8 founders in columns, markers in slices.}
 
-\item{addcovar:}{numeric matrix of additive covariates without the intercept. Sample IDs must be in rownames. Typically creates using model.matrix(~covar1 + covar2, data = data)[,-1].}
+\item{addcovar:}{numeric matrix of additive covariates *without* the intercept. Sample IDs must be in rownames. Typically creates using model.matrix(~covar1 + covar2, data = data).}
 
 \item{cc_dbfile:}{full path to the CC_SNP database file created by Karl Broman.}
 }

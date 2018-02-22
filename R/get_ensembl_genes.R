@@ -16,7 +16,7 @@ get_ensembl_genes = function(chr = c(1:19, "X", "Y", "MT"), build = 90) {
     stop("Chr argument must contain a valid chromsome ID.")
   }
 
-  hub = AnnotationHub::query(AnnotationHub(), c("ensembl", "mus musculus", "gtf", build))
+  hub = AnnotationHub::query(AnnotationHub::AnnotationHub(), c("ensembl", "mus musculus", "gtf", build))
   wh = grep(paste0("Mus_musculus.GRCm38.", build,".gtf"), hub$title)
 
   if(length(wh) == 0) {

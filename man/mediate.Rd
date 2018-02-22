@@ -32,3 +32,22 @@ data.frame containing the mediation results.
 \description{
 Regress one phenotype on the given genes at a single marker.
 }
+\examples{
+data(pheno)
+data(genoprobs)
+data(map)
+data(addcovar)
+data(expr)
+chr = 13
+pos = 112.205823
+build = 90
+ensembl = get_ensembl_genes(chr = chr, build = build)
+          med = mediate(pheno = pheno,
+          chr = chr,
+          pos = pos,
+          type = "haplo",
+          expr = dataset.islet.rnaseq$expr,
+          ensembl = ensembl,
+          genoprobs = genoprobs,
+          addcovar = addcovar)
+}

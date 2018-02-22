@@ -63,13 +63,15 @@ mediate = function(pheno, chr, pos, type = c("haplo", "snp"), expr, ensembl,
   expr.df  = data.frame(mouse = rownames(expr), expr)
   addcovar.df = data.frame(mouse = rownames(addcovar), addcovar)
 
-  df = left_join(pheno.df, Q,  by = "mouse") %>%
-           left_join(y = addcovar.df, by = "mouse") %>%
-           left_join(y = expr.df, by = "mouse") %>%
-           select(-mouse) %>%
-           gather_("ensembl", "expr", colnames(.)[grep("^ENSMUSG", colnames(.))]) %>%
-           group_by(ensembl) %>%
-           nest()
+  suppressWarnings({
+    df = left_join(pheno.df, Q,  by = "mouse") %>%
+      left_join(y = addcovar.df, by = "mouse") %>%
+      left_join(y = expr.df, by = "mouse") %>%
+      select(-mouse) %>%
+      gather_("ensembl", "expr", colnames(.)[grep("^ENSMUSG", colnames(.))]) %>%
+      group_by(ensembl) %>%
+      nest()
+  })
 
   # NOTE: We compute the LOD as 0.5 * -num_samples * log10(full_ss / red_ss).
   num_samp = nrow(df$data[[1]])

@@ -19,7 +19,7 @@ plot_med = function(med, threshold = -1) {
   ggplot(data = med, mapping = aes(x = start, y = lod)) +
     geom_point() +
     if(threshold > 0) {
-      geom_label(aes(pos, lod, label = symbol), data = filter(med, lod_std < threshold | lod_std > threshold))
+      geom_label(aes(start, lod, label = symbol), data = filter(med, lod_std < -threshold | lod_std > threshold))
     }
 
 }

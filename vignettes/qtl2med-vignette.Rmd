@@ -1,0 +1,94 @@
+---
+title: "Mediation Analysis of QTL Peaks using qtl2 Data Structures"
+author: "Daniel M. Gatti, Ph.D."
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Setup
+
+```{r setup}
+library(qtl2)
+library(qtl2med)
+```
+
+Use a locus on Chr 13 near 112.2 Mb as the mediation locus.
+
+```{r setup_locus}
+build = 90
+chr = 13
+pos = 112.205823
+cc_dbfile = "C:/Users/dgatti/Documents/Sanger/cc_variants.sqlite"
+```
+
+Get Ensembl genes for one chormosome from a specific Ensembl build.
+
+```{r get_ensembl,warning=FALSE,message=FALSE}
+ensembl = get_ensembl_genes(chr = chr, build = build)
+```
+
+Mediate using founder allele probabilities.
+
+```{r allele_mediation}
+med_allele = mediate(pheno = pheno,
+                     chr = chr,
+                     pos = pos,
+                     type = "haplo",
+                     expr = expr,
+                     ensembl = ensembl,
+                     genoprobs = genoprobs,
+                     addcovar = addcovar)
+```
+
+Plot the mediation scan on Chr 13, labelling all genes that are more than 6 standard deviations from the mean LOD score.
+
+```{r plot_allele_mediation}
+plot_med(med = med_allele, threshold = 6)
+```
+
+Mediate using the SNP probabilities.
+
+```{r snp_mediation}
+med_snp = mediate(pheno = pheno,
+                  chr = chr,
+                  pos = pos,
+                  type = "snp",
+                  expr = expr,
+                  ensembl = ensembl,
+                  genoprobs = genoprobs,
+                  addcovar = addcovar,
+                  cc_dbfile = cc_dbfile)
+```
+
+
+```{r plot_snp_mediation}
+plot_med(med = med_snp, threshold = 6)
+```
+
+Additional functions that may be used, if needed.
+
+Get founder allele probs near a given position.
+
+```{r get_allele_probs}
+gp = get_allele_probs(chr = chr, pos = pos, genoprobs = genoprobs, map = map)
+```
+
+Get SNP probs near a given position.
+
+```{r}
+query_fxn = qtl2::create_variant_query_func(cc_dbfile, filter = "type=='snp'")
+sp = get_snp_probs(chr = chr, pos = pos, genoprobs = genoprobs,
+                   map = map, query_fxn = query_fxn)
+```
+

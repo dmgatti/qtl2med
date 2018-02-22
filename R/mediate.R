@@ -10,20 +10,38 @@
 #' @param addcovar: numeric matrix of additive covariates *without* the intercept. Sample IDs must be in rownames. Typically creates using model.matrix(~covar1 + covar2, data = data).
 #' @param cc_dbfile: full path to the CC_SNP database file created by Karl Broman.
 #' @return data.frame containing the mediation results.
+#' @examples
+#' data(pheno)
+#' data(genoprobs)
+#' data(map)
+#' data(addcovar)
+#' data(expr)
+#' chr = 13
+#' pos = 112.205823
+#' build = 90
+#' ensembl = get_ensembl_genes(chr = chr, build = build)
+#'           med = mediate(pheno = pheno,
+#'           chr = chr,
+#'           pos = pos,
+#'           type = "haplo",
+#'           expr = dataset.islet.rnaseq$expr,
+#'           ensembl = ensembl,
+#'           genoprobs = genoprobs,
+#'           addcovar = addcovar)
+#' @export
 mediate = function(pheno, chr, pos, type = c("haplo", "snp"), expr, ensembl,
           genoprobs, addcovar, cc_dbfile) {
 
   type = match.arg(type)
-
-  query_fxn = create_variant_query_func(cc_dbfile, filter = "type=='snp'")
 
   # Get the genotype (Q).
   # NOTE: we remove the first column of genoprobs in the haplo probs case.
   Q = switch(type,
          haplo = get_allele_probs(chr = chr, pos = pos, genoprobs = genoprobs,
                  map = map)[,-1],
-         snp = get_snp_probs(chr = chr, pos = pos, genoprobs = genoprobs,
-                   map = map, query_fxn = query_fxn))
+         snp = {query_fxn = create_variant_query_func(cc_dbfile, filter = "type=='snp'");
+                get_snp_probs(chr = chr, pos = pos, genoprobs = genoprobs,
+                   map = map, query_fxn = query_fxn)})
 
   Q = data.frame(mouse = rownames(Q), Q)
 

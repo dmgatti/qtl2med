@@ -7,6 +7,7 @@
 #' @return n x 8 numeric matrix.
 #' @examples
 #' ap = get_allele_probs(chr = "1", pos = 5.0, genoprobs = genoprobs, map = map)
+#' @export
 get_allele_probs = function(chr, pos, genoprobs, map) {
 
   if(is.null(pos) || chr == "") {

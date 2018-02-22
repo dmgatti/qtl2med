@@ -5,6 +5,7 @@
 #' @return data.frame with the genes on the given chromosomes.
 #' @examples
 #' ens = get_ensembl_genes(chr = "19", build = 90)
+#' @export
 get_ensembl_genes = function(chr = c(1:19, "X", "Y", "MT"), build = 90) {
 
   if(is.null(build) || build == "") {
